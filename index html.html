@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proxy Studio — Geo Proxy Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080809;--surface:#0f0f11;--surface2:#161618;
+  --border:#222226;--border2:#2e2e34;
+  --text:#f0f0f2;--muted:#6b6b75;--hint:#3a3a42;
+  --accent:#4f8ef7;--accent2:#7c5af0;--green:#3ecf8e;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 24px}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:36px}
+.logo-pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:0.5px solid var(--border2);border-radius:999px;padding:6px 16px;margin-bottom:20px}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.logo-pill span{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+h1{font-family:'Syne',sans-serif;font-size:36px;font-weight:700;color:var(--text);letter-spacing:-.03em;margin-bottom:8px}
+h1 span{color:var(--accent)}
+.tagline{font-size:14px;color:var(--muted);font-weight:300}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:285px 1fr;gap:16px;align-items:start}
+.left-col{display:flex;flex-direction:column;gap:12px}
+
+/* CARD */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:18px}
+
+/* FIELD */
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field-label{font-size:10.5px;font-weight:500;color:var(--muted);letter-spacing:.09em;text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.opt{font-size:10px;background:var(--surface2);color:var(--hint);border-radius:4px;padding:1px 6px;font-weight:400;text-transform:none;letter-spacing:0}
+
+.inp-wrap{position:relative}
+.inp-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--hint);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.inp-wrap input{width:100%;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:9px 30px 9px 32px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+.inp-wrap input::placeholder{color:var(--hint)}
+.inp-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.1)}
+.clr-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--hint);font-size:12px;padding:3px 5px;display:none;line-height:1;border-radius:4px}
+.clr-btn:hover{color:var(--muted);background:var(--surface2)}
+.clr-btn.show{display:block}
+
+/* DROPDOWN */
+.dropdown{background:var(--surface2);border:0.5px solid var(--border2);border-radius:8px;margin-top:4px;display:none;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4);position:relative;z-index:100;max-height:200px;overflow-y:auto}
+.dropdown.open{display:block}
+.dropdown::-webkit-scrollbar{width:3px}
+.dropdown::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+.drop-item{padding:9px 13px;font-size:13px;color:#b0b0bc;cursor:pointer;transition:background .1s;display:flex;align-items:center;gap:8px}
+.drop-item:hover{background:var(--border);color:var(--text)}
+.drop-emoji{font-size:14px}
+
+/* DIVIDER */
+.divider{height:0.5px;background:var(--border);margin:14px 0}
+
+/* AMOUNT */
+.amt-input{width:100%;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px 9px 32px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+.amt-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.1)}
+
+/* GEN BUTTON */
+.gen-btn{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s,transform .1s;letter-spacing:.01em;margin-top:4px}
+.gen-btn:hover{background:#3070e0}
+.gen-btn:active{transform:scale(.98)}
+.gen-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* RIGHT PANEL */
+.right-panel{display:flex;flex-direction:column;gap:12px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px}
+.stat-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.stat-value{font-size:20px;font-weight:500;font-family:'Syne',sans-serif;color:var(--text)}
+.stat-value.accent{color:var(--accent)}
+
+/* OUTPUT */
+.output-card{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:18px}
+.out-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.out-title{font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:8px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--hint)}
+.live-dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.out-actions{display:flex;gap:8px;align-items:center}
+.pill{font-size:11px;color:var(--muted);background:var(--surface2);border:0.5px solid var(--border);border-radius:999px;padding:3px 10px}
+.copy-btn{display:flex;align-items:center;gap:5px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--muted);background:var(--surface2);border:0.5px solid var(--border2);border-radius:7px;padding:5px 12px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{color:var(--text);border-color:var(--muted)}
+.copy-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* OUTPUT BOX */
+.out-box{background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:14px;min-height:400px;max-height:500px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px}
+.out-box::-webkit-scrollbar{width:4px}
+.out-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+.proxy-row{display:flex;gap:10px;padding:5px 0;border-bottom:0.5px solid #14141a;align-items:baseline}
+.proxy-row:last-child{border-bottom:none}
+.proxy-num{color:var(--hint);font-size:10.5px;min-width:26px;text-align:right;flex-shrink:0;user-select:none}
+.proxy-str{color:#6b6b7a;word-break:break-all;flex:1;line-height:1.6}
+.proxy-str .host{color:#8888a0}
+.proxy-str .region{color:var(--accent)}
+.proxy-str .geo{color:#88aaee}
+.proxy-str .sid-lbl{color:var(--muted)}
+.proxy-str .sid-val{color:var(--accent2)}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:360px;gap:12px;color:var(--hint)}
+.empty-state svg{width:34px;height:34px;stroke:var(--hint);fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;opacity:.4}
+.empty-state p{font-size:13px}
+
+/* LOADING */
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:12px}
+.loading-bar{width:200px;height:2px;background:var(--border);border-radius:99px;overflow:hidden}
+.loading-fill{height:100%;background:var(--accent);border-radius:99px;animation:load 1.4s ease-in-out infinite}
+@keyframes load{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+.loading-text{font-size:13px;color:var(--muted)}
+.error-text{font-size:13px;color:#f5a623;text-align:center;padding:20px;background:var(--surface);border:0.5px solid var(--border);border-radius:10px}
+
+/* FOOTER */
+.footer{text-align:center;margin-top:28px;font-size:11.5px;color:var(--hint)}
+
+@media(max-width:720px){
+  .layout{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  h1{font-size:26px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo-pill"><div class="logo-dot"></div><span>Proxy Studio</span></div>
+    <h1>Geo <span>Proxy</span> Generator</h1>
+    <p class="tagline">250 countries · All fields optional · Any combination</p>
+  </div>
+
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-bar"><div class="loading-fill"></div></div>
+    <div class="loading-text">Loading geo database...</div>
+  </div>
+
+  <div class="layout" id="main-layout" style="display:none">
+    <!-- LEFT -->
+    <div class="left-col">
+      <div class="card">
+        <!-- COUNTRY -->
+        <div class="field">
+          <div class="field-label">
+            <svg style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Country <span class="opt">optional</span>
+          </div>
+          <div class="inp-wrap">
+            <svg class="inp-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="country-inp" placeholder="Search 250 countries..." autocomplete="off">
+            <button class="clr-btn" id="country-clr" onclick="clearF('country')">✕</button>
+          </div>
+          <div class="dropdown" id="country-drop"></div>
+        </div>
+
+        <!-- STATE -->
+        <div class="field">
+          <div class="field-label">
+            <svg style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M3 6l9-4 9 4v14l-9 4-9-4z"/></svg>
+            State / Region <span class="opt">optional</span>
+          </div>
+          <div class="inp-wrap">
+            <svg class="inp-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="state-inp" placeholder="Search states..." autocomplete="off">
+            <button class="clr-btn" id="state-clr" onclick="clearF('state')">✕</button>
+          </div>
+          <div class="dropdown" id="state-drop"></div>
+        </div>
+
+        <!-- CITY -->
+        <div class="field" style="margin-bottom:0">
+          <div class="field-label">
+            <svg style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="11"/><path d="M7 21V10l5-7 5 7v11"/></svg>
+            City <span class="opt">optional</span>
+          </div>
+          <div class="inp-wrap">
+            <svg class="inp-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="city-inp" placeholder="Search cities..." autocomplete="off">
+            <button class="clr-btn" id="city-clr" onclick="clearF('city')">✕</button>
+          </div>
+          <div class="dropdown" id="city-drop"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field" style="margin-bottom:12px">
+          <div class="field-label">
+            <svg style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Amount
+          </div>
+          <div class="inp-wrap">
+            <svg class="inp-ico" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+            <input type="number" id="amount-inp" class="amt-input" min="1" max="500" value="10" placeholder="How many?">
+          </div>
+        </div>
+        <button class="gen-btn" onclick="generate()">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Generate Proxies
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-panel">
+      <div class="stats">
+        <div class="stat-card"><div class="stat-label">Generated</div><div class="stat-value accent" id="stat-count">0</div></div>
+        <div class="stat-card"><div class="stat-label">Region code</div><div class="stat-value" id="stat-region">—</div></div>
+        <div class="stat-card"><div class="stat-label">Targeting</div><div class="stat-value" id="stat-target" style="font-size:14px;padding-top:3px">—</div></div>
+      </div>
+
+      <div class="output-card">
+        <div class="out-header">
+          <div class="out-title"><div class="live-dot" id="live-dot"></div>Output</div>
+          <div class="out-actions">
+            <span class="pill" id="count-pill">0 proxies</span>
+            <button class="copy-btn" id="copy-btn" onclick="copyAll()">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy all
+            </button>
+          </div>
+        </div>
+        <div class="out-box" id="out-box">
+          <div class="empty-state" id="empty-state">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <p>Configure targeting and hit generate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Proxy Studio &mdash; All fields optional. Use any combination.</div>
+</div>
+
+<script>
+let geoData=[], selCountry="", selState="", selCity="";
+
+// ── LOAD GEO ──
+async function loadGeo(){
+  try{
+    const res=await fetch("geo.json");
+    if(!res.ok) throw new Error("geo.json not found");
+    geoData=await res.json();
+    document.getElementById("loading-screen").style.display="none";
+    document.getElementById("main-layout").style.display="grid";
+  }catch(e){
+    document.getElementById("loading-screen").innerHTML=
+      `<div class="error-text">⚠ Could not load <strong>geo.json</strong><br><br>
+      Make sure <strong>geo.json</strong> and <strong>index.html</strong> are in the same folder.<br>
+      <small style="color:var(--muted);margin-top:8px;display:block">${e.message}</small></div>`;
+  }
+}
+
+// ── SEARCH ──
+function fuzz(q,items){
+  q=q.toLowerCase().trim();
+  if(!q)return[];
+  const starts=items.filter(i=>i.toLowerCase().startsWith(q));
+  const contains=items.filter(i=>i.toLowerCase().includes(q)&&!i.toLowerCase().startsWith(q));
+  return[...starts,...contains].slice(0,10);
+}
+
+function getStates(country){
+  if(country){const c=geoData.find(c=>c.name===country);return c?(c.states||[]).map(s=>s.name):[];}
+  const all=new Set();geoData.forEach(c=>(c.states||[]).forEach(s=>all.add(s.name)));return[...all];
+}
+
+function getCities(country,state){
+  if(country&&state){
+    const c=geoData.find(c=>c.name===country);if(!c)return[];
+    const s=(c.states||[]).find(s=>s.name===state);return s?(s.cities||[]):[];
+  }
+  if(country){
+    const c=geoData.find(c=>c.name===country);if(!c)return[];
+    const all=[];(c.states||[]).forEach(s=>all.push(...(s.cities||[])));return all;
+  }
+  if(state){
+    const all=[];geoData.forEach(c=>(c.states||[]).forEach(s=>{if(s.name===state)all.push(...(s.cities||[]))}));return all;
+  }
+  // no filter — return first city of each state as hints
+  const all=[];geoData.forEach(c=>(c.states||[]).forEach(s=>{if(s.cities&&s.cities[0])all.push(s.cities[0])}));return all;
+}
+
+// ── DROPDOWN ──
+function buildDrop(dropEl,items,onSelect,withEmoji=false){
+  dropEl.innerHTML="";
+  if(!items.length){dropEl.classList.remove("open");return;}
+  items.forEach(item=>{
+    const d=document.createElement("div");
+    d.className="drop-item";
+    if(withEmoji&&item.emoji){
+      d.innerHTML=`<span class="drop-emoji">${item.emoji}</span>${item.name}`;
+    } else {
+      d.textContent=typeof item==="string"?item:item.name;
+    }
+    d.onmousedown=e=>{e.preventDefault();onSelect(item);dropEl.classList.remove("open")};
+    dropEl.appendChild(d);
+  });
+  dropEl.classList.add("open");
+}
+
+function showClr(id,v){document.getElementById(id).classList.toggle("show",v.length>0)}
+
+// ── COUNTRY INPUT ──
+document.getElementById("country-inp").oninput=function(){
+  showClr("country-clr",this.value);
+  if(!this.value){selCountry="";return;}
+  const matches=fuzz(this.value,geoData.map(c=>c.name));
+  const items=matches.map(n=>geoData.find(c=>c.name===n)).filter(Boolean);
+  buildDrop(document.getElementById("country-drop"),items,item=>{
+    selCountry=item.name;
+    document.getElementById("country-inp").value=item.name;
+    showClr("country-clr",item.name);
+  },true);
+};
+
+// ── STATE INPUT ──
+document.getElementById("state-inp").oninput=function(){
+  showClr("state-clr",this.value);
+  if(!this.value){selState="";return;}
+  buildDrop(document.getElementById("state-drop"),fuzz(this.value,getStates(selCountry)),val=>{
+    selState=val;document.getElementById("state-inp").value=val;showClr("state-clr",val);
+  });
+};
+
+// ── CITY INPUT ──
+document.getElementById("city-inp").oninput=function(){
+  showClr("city-clr",this.value);
+  if(!this.value){selCity="";return;}
+  const cities=getCities(selCountry,selState);
+  const names=cities.map(c=>typeof c==="string"?c:c.name);
+  buildDrop(document.getElementById("city-drop"),fuzz(this.value,names),val=>{
+    selCity=val;document.getElementById("city-inp").value=val;showClr("city-clr",val);
+  });
+};
+
+// ── CLEAR ──
+function clearF(f){
+  const m={country:["country-inp","country-clr","country-drop"],state:["state-inp","state-clr","state-drop"],city:["city-inp","city-clr","city-drop"]};
+  const[inp,clr,drop]=m[f];
+  document.getElementById(inp).value="";
+  document.getElementById(clr).classList.remove("show");
+  document.getElementById(drop).classList.remove("open");
+  if(f==="country")selCountry="";
+  if(f==="state")selState="";
+  if(f==="city")selCity="";
+}
+
+// ── CLOSE DROPDOWNS ──
+document.addEventListener("click",e=>{
+  ["country","state","city"].forEach(f=>{
+    const drop=document.getElementById(f+"-drop");
+    const inp=document.getElementById(f+"-inp");
+    if(!drop.contains(e.target)&&e.target!==inp)drop.classList.remove("open");
+  });
+});
+
+// ── SESSION ID ──
+function randSid(n=12){const c="abcdefghijklmnopqrstuvwxyz0123456789";let s="";for(let i=0;i<n;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
+
+// ── GET ISO2 ──
+function getCode(){
+  if(selCountry){const c=geoData.find(c=>c.name===selCountry);if(c&&c.iso2)return c.iso2;}
+  const typed=document.getElementById("country-inp").value.trim();
+  return typed?typed.substring(0,2).toUpperCase():"XX";
+}
+
+// ── GENERATE ──
+function generate(){
+  const amount=Math.min(parseInt(document.getElementById("amount-inp").value)||10,500);
+  const code=getCode();
+  const stV=(selState||document.getElementById("state-inp").value.trim()).replace(/\s/g,"");
+  const ctV=(selCity||document.getElementById("city-inp").value.trim()).replace(/\s/g,"");
+  const stPart=stV?`-state-${stV}`:"";
+  const ctPart=ctV?`-city-${ctV}`:"";
+
+  const box=document.getElementById("out-box");
+  box.innerHTML="";
+
+  const sess=new Set();let n=0;
+  while(n<amount){
+    const sid=randSid();
+    if(!sess.has(sid)){
+      sess.add(sid);
+      const row=document.createElement("div");
+      row.className="proxy-row";
+      row.innerHTML=`<span class="proxy-num">${n+1}</span><span class="proxy-str">`
+        +`<span class="host">us.arxlabs.io:3010:</span>`
+        +`<span class="region">Night3rd-region-${code}</span>`
+        +(stPart?`<span class="geo">${stPart}</span>`:"")
+        +(ctPart?`<span class="geo">${ctPart}</span>`:"")
+        +`<span class="sid-lbl">-sid-</span><span class="sid-val">${sid}</span>`
+        +`<span class="host">-t-100:11dsjfhw9</span>`
+        +`</span>`;
+      box.appendChild(row);n++;
+    }
+  }
+
+  document.getElementById("stat-count").textContent=n;
+  document.getElementById("stat-region").textContent=code;
+  const parts=[stV,ctV].filter(Boolean);
+  document.getElementById("stat-target").textContent=parts.length?parts.join(" + "):"Global";
+  document.getElementById("count-pill").textContent=n+" proxies";
+  document.getElementById("live-dot").classList.add("on");
+}
+
+// ── COPY ──
+function copyAll(){
+  const rows=[...document.querySelectorAll(".proxy-str")];
+  if(!rows.length)return;
+  const text=rows.map(r=>r.textContent).join("\n");
+  navigator.clipboard.writeText(text).catch(()=>{
+    const ta=document.createElement("textarea");ta.value=text;
+    document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);
+  });
+  const btn=document.getElementById("copy-btn");
+  btn.innerHTML=`<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+  setTimeout(()=>{btn.innerHTML=`<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy all`},1500);
+}
+
+loadGeo();
+</script>
+</body>
+</html>
