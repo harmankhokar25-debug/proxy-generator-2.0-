@@ -1,0 +1,339 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1rem 0;font-family:var(--font-sans)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:18px;margin-bottom:12px}
+.lbl{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.opt{font-size:10px;background:var(--color-background-secondary);color:var(--color-text-tertiary);border-radius:4px;padding:1px 6px;font-weight:400;text-transform:none;letter-spacing:0}
+textarea{width:100%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;font-family:var(--font-mono);color:var(--color-text-primary);outline:none;resize:vertical;min-height:80px;line-height:1.6}
+textarea:focus{border-color:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,.12)}
+textarea::placeholder{color:var(--color-text-tertiary)}
+.parse-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;font-weight:500;color:var(--color-text-primary);cursor:pointer;margin-top:8px;transition:all .15s}
+.parse-btn:hover{border-color:#378ADD;color:#378ADD}
+.detected{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px;margin-top:10px;display:none}
+.detected.show{display:block}
+.det-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.det-tag{font-size:11px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:4px;padding:3px 8px;color:var(--color-text-secondary);font-family:var(--font-mono)}
+.det-tag span{color:#378ADD;font-weight:500}
+.layout{display:grid;grid-template-columns:260px 1fr;gap:12px}
+.inp-wrap{position:relative}
+.inp-wrap input{width:100%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 28px 8px 30px;font-size:13px;color:var(--color-text-primary);outline:none;transition:border-color .15s}
+.inp-wrap input:focus{border-color:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,.1)}
+.inp-wrap input::placeholder{color:var(--color-text-tertiary)}
+.ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--color-text-tertiary);pointer-events:none}
+.clr{position:absolute;right:7px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:12px;display:none;padding:2px 4px;line-height:1}
+.clr.show{display:block}
+.drop{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);margin-top:3px;display:none;max-height:160px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.12);position:relative;z-index:50}
+.drop.open{display:block}
+.drop-item{padding:8px 12px;font-size:13px;color:var(--color-text-secondary);cursor:pointer}
+.drop-item:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.amt-inp{width:100%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 12px 8px 30px;font-size:13px;color:var(--color-text-primary);outline:none}
+.amt-inp:focus{border-color:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,.1)}
+.gen-btn{width:100%;padding:11px;background:#378ADD;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s;margin-top:4px}
+.gen-btn:hover{background:#185FA5}
+.gen-btn:active{transform:scale(.98)}
+.right-panel{display:flex;flex-direction:column;gap:10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.stat-lbl{font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.stat-val{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.stat-val.accent{color:#378ADD}
+.out-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.out-title{font-size:13px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:7px}
+.live{width:6px;height:6px;border-radius:50%;background:var(--color-text-tertiary)}
+.live.on{background:#3ecf8e}
+.actions{display:flex;gap:7px;align-items:center}
+.pill{font-size:11px;color:var(--color-text-secondary);background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:999px;padding:2px 9px}
+.copy-btn{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:5px 10px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{color:var(--color-text-primary)}
+.out-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px;min-height:280px;max-height:360px;overflow-y:auto;font-family:var(--font-mono);font-size:11.5px}
+.out-box::-webkit-scrollbar{width:3px}
+.out-box::-webkit-scrollbar-thumb{background:var(--color-border-secondary);border-radius:99px}
+.proxy-row{display:flex;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary);align-items:baseline}
+.proxy-row:last-child{border-bottom:none}
+.proxy-num{color:var(--color-text-tertiary);font-size:10px;min-width:22px;text-align:right;flex-shrink:0}
+.proxy-txt{color:var(--color-text-secondary);word-break:break-all;flex:1;line-height:1.6}
+.proxy-txt .hl{color:#378ADD}
+.proxy-txt .hl2{color:#7c5af0}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:240px;gap:8px;color:var(--color-text-tertiary)}
+.empty i{font-size:28px;opacity:.4}
+.empty p{font-size:12px}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:12px 0}
+.warn{font-size:12px;color:#f5a623;background:rgba(245,166,35,.08);border:0.5px solid rgba(245,166,35,.3);border-radius:var(--border-radius-md);padding:8px 12px;margin-top:8px;display:none}
+.warn.show{display:block}
+</style>
+
+<h2 class="sr-only">Smart proxy generator — paste any proxy format, auto-detects pattern, regenerates with new location and session IDs</h2>
+
+<div class="wrap">
+
+<div class="card">
+  <div class="lbl"><i class="ti ti-terminal" aria-hidden="true"></i>Paste your proxy template</div>
+  <textarea id="proxy-template" placeholder="Paste any proxy here, e.g:&#10;us.arxlabs.io:3010:Night3rd-region-US-state-California-city-LosAngeles-sid-abc123xyz-t-100:password&#10;or&#10;proxy.example.com:8080:user-country-GB-session-def456:pass123"></textarea>
+  <button class="parse-btn" onclick="parseProxy()">
+    <i class="ti ti-scan" aria-hidden="true"></i> Auto-detect format
+  </button>
+  <div class="warn" id="warn-box">⚠ Could not fully detect pattern. The site will try its best — check the output.</div>
+  <div class="detected" id="detected-box">
+    <div class="lbl" style="margin-bottom:0">Detected pattern</div>
+    <div class="det-row" id="det-tags"></div>
+  </div>
+</div>
+
+<div class="layout">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="card">
+      <div class="field" style="margin-bottom:12px">
+        <div class="lbl"><i class="ti ti-world" aria-hidden="true"></i>Country <span class="opt">optional</span></div>
+        <div class="inp-wrap">
+          <i class="ti ti-search ico" aria-hidden="true"></i>
+          <input type="text" id="ci" placeholder="Search country..." autocomplete="off">
+          <button class="clr" id="cc" onclick="clrF('c')">✕</button>
+        </div>
+        <div class="drop" id="cd"></div>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <div class="lbl"><i class="ti ti-map" aria-hidden="true"></i>State <span class="opt">optional</span></div>
+        <div class="inp-wrap">
+          <i class="ti ti-search ico" aria-hidden="true"></i>
+          <input type="text" id="si" placeholder="Search state..." autocomplete="off">
+          <button class="clr" id="sc" onclick="clrF('s')">✕</button>
+        </div>
+        <div class="drop" id="sd"></div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <div class="lbl"><i class="ti ti-building" aria-hidden="true"></i>City <span class="opt">optional</span></div>
+        <div class="inp-wrap">
+          <i class="ti ti-search ico" aria-hidden="true"></i>
+          <input type="text" id="ti" placeholder="Search city..." autocomplete="off">
+          <button class="clr" id="tc" onclick="clrF('t')">✕</button>
+        </div>
+        <div class="drop" id="td"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="lbl"><i class="ti ti-hash" aria-hidden="true"></i>Amount</div>
+      <div class="inp-wrap">
+        <i class="ti ti-list-numbers ico" aria-hidden="true"></i>
+        <input type="number" id="ai" class="amt-inp" min="1" max="500" value="10">
+      </div>
+      <button class="gen-btn" onclick="generate()">
+        <i class="ti ti-bolt" aria-hidden="true"></i> Generate proxies
+      </button>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="stats">
+      <div class="stat"><div class="stat-lbl">Generated</div><div class="stat-val accent" id="sv1">0</div></div>
+      <div class="stat"><div class="stat-lbl">Region</div><div class="stat-val" id="sv2">—</div></div>
+      <div class="stat"><div class="stat-lbl">Format</div><div class="stat-val" id="sv3" style="font-size:13px;padding-top:2px">—</div></div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="out-header">
+        <div class="out-title"><div class="live" id="live-dot"></div>Output</div>
+        <div class="actions">
+          <span class="pill" id="cpill">0 proxies</span>
+          <button class="copy-btn" id="copybtn" onclick="doCopy()">
+            <i class="ti ti-copy" aria-hidden="true"></i> Copy all
+          </button>
+        </div>
+      </div>
+      <div class="out-box" id="out-box">
+        <div class="empty" id="emp">
+          <i class="ti ti-terminal-2" aria-hidden="true"></i>
+          <p>Paste a proxy above, then generate</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+
+let GEO = {};
+let countries = [];
+
+fetch('geo.json')
+  .then(r => r.json())
+  .then(data => {
+    data.forEach(country => {
+      GEO[country.name] = {
+        code: country.iso2 || "",
+        states: {}
+      };
+
+      (country.states || []).forEach(state => {
+        GEO[country.name].states[state.name] = state.cities || [];
+      });
+    });
+
+    countries = Object.keys(GEO);
+  })
+  .catch(err => console.error('Failed to load geo.json:', err));
+
+let sC="",sS="",sT="";
+let parsedTemplate=null;
+
+// ── PROXY PARSER ──
+function parseProxy(){
+  const raw=document.getElementById("proxy-template").value.trim();
+  if(!raw){return;}
+  parsedTemplate=null;
+
+  // Split on common delimiters to get parts
+  // Common formats:
+  // host:port:user:pass
+  // host:port:user-region-XX-state-YY-city-ZZ-sid-ABC:pass
+  // host:port:user:pass@host or variations
+
+  const parts=raw.split(":");
+  const warn=document.getElementById("warn-box");
+  const detBox=document.getElementById("detected-box");
+  const detTags=document.getElementById("det-tags");
+  warn.classList.remove("show");
+
+  // Detect session/sid pattern
+  const sidMatch=raw.match(/[-_]?(?:sid|session|sess|s)[-_=]([a-z0-9]+)/i);
+  // Detect region/country pattern
+  const regionMatch=raw.match(/[-_]?(?:region|country|cc|r)[-_=]([a-zA-Z]{2,3})/i);
+  // Detect state pattern
+  const stateMatch=raw.match(/[-_]?(?:state|st|province)[-_=]([a-zA-Z]+)/i);
+  // Detect city pattern
+  const cityMatch=raw.match(/[-_]?(?:city|ct|c)[-_=]([a-zA-Z]+)/i);
+
+  // Build template by replacing detected parts with placeholders
+  let template=raw;
+  let detected={};
+
+  if(sidMatch){
+    detected.sid=sidMatch[1];
+    template=template.replace(sidMatch[0], sidMatch[0].replace(sidMatch[1],"{{SID}}"));
+  } else {
+    // Try to detect any random alphanumeric token as session
+    const tokenMatch=raw.match(/[-_:]([a-z0-9]{8,20})(?:[-_:]|$)/i);
+    if(tokenMatch){
+      detected.sid=tokenMatch[1];
+      template=template.replace(tokenMatch[1],"{{SID}}");
+    }
+  }
+
+  if(regionMatch){
+    detected.region=regionMatch[1];
+    template=template.replace(regionMatch[0], regionMatch[0].replace(regionMatch[1],"{{REGION}}"));
+  }
+  if(stateMatch){
+    detected.state=stateMatch[1];
+    template=template.replace(stateMatch[0], stateMatch[0].replace(stateMatch[1],"{{STATE}}"));
+  }
+  if(cityMatch){
+    detected.city=cityMatch[1];
+    template=template.replace(cityMatch[0], cityMatch[0].replace(cityMatch[1],"{{CITY}}"));
+  }
+
+  // Always replace SID if not found
+  if(!detected.sid){
+    warn.classList.add("show");
+  }
+
+  parsedTemplate={template, detected, raw};
+
+  // Show detected tags
+  detTags.innerHTML="";
+  const tags=[
+    {label:"Host", val: parts[0]||"?"},
+    {label:"Port", val: parts[1]||"?"},
+    {label:"Region", val: detected.region||"not found"},
+    {label:"State", val: detected.state||"not found"},
+    {label:"City", val: detected.city||"not found"},
+    {label:"Session", val: detected.sid ? detected.sid.substring(0,8)+"…" : "not found"},
+  ];
+  tags.forEach(t=>{
+    const d=document.createElement("div");
+    d.className="det-tag";
+    d.innerHTML=`${t.label}: <span>${t.val}</span>`;
+    detTags.appendChild(d);
+  });
+  detBox.classList.add("show");
+}
+
+// ── GEO HELPERS ──
+function allStates(){const r=new Set();countries.forEach(c=>Object.keys(GEO[c].states).forEach(s=>r.add(s)));return[...r]}
+function allCities(){const r=new Set();countries.forEach(c=>Object.values(GEO[c].states).forEach(a=>a.forEach(ci=>r.add(ci))));return[...r]}
+function statesFor(c){return c&&GEO[c]?Object.keys(GEO[c].states):allStates()}
+function citiesFor(c,s){if(c&&s&&GEO[c]?.states[s])return GEO[c].states[s];if(c&&GEO[c]){const r=[];Object.values(GEO[c].states).forEach(a=>r.push(...a));return r}if(s){const r=[];countries.forEach(co=>{if(GEO[co].states[s])r.push(...GEO[co].states[s])});return r}return allCities()}
+function fuzz(q,items){q=q.toLowerCase().trim();if(!q)return[];return items.filter(i=>i.toLowerCase().includes(q)).slice(0,8)}
+
+function mkDrop(el,items,cb){el.innerHTML="";if(!items.length){el.classList.remove("open");return}items.forEach(v=>{const d=document.createElement("div");d.className="drop-item";d.textContent=v;d.onmousedown=e=>{e.preventDefault();cb(v);el.classList.remove("open")};el.appendChild(d)});el.classList.add("open")}
+function tog(id,v){document.getElementById(id).classList.toggle("show",v.length>0)}
+
+document.getElementById("ci").oninput=function(){tog("cc",this.value);if(!this.value){sC="";return}mkDrop(document.getElementById("cd"),fuzz(this.value,countries),v=>{sC=v;document.getElementById("ci").value=v;tog("cc",v)})};
+document.getElementById("si").oninput=function(){tog("sc",this.value);if(!this.value){sS="";return}mkDrop(document.getElementById("sd"),fuzz(this.value,statesFor(sC)),v=>{sS=v;document.getElementById("si").value=v;tog("sc",v)})};
+document.getElementById("ti").oninput=function(){tog("tc",this.value);if(!this.value){sT="";return}mkDrop(document.getElementById("td"),fuzz(this.value,citiesFor(sC,sS)),v=>{sT=v;document.getElementById("ti").value=v;tog("tc",v)})};
+
+function clrF(f){const m={c:["ci","cc","cd"],s:["si","sc","sd"],t:["ti","tc","td"]};const[i,c,d]=m[f];document.getElementById(i).value="";document.getElementById(c).classList.remove("show");document.getElementById(d).classList.remove("open");if(f==="c")sC="";if(f==="s")sS="";if(f==="t")sT=""}
+document.addEventListener("click",e=>{[["ci","cd"],["si","sd"],["ti","td"]].forEach(([i,d])=>{const dr=document.getElementById(d),inp=document.getElementById(i);if(!dr.contains(e.target)&&e.target!==inp)dr.classList.remove("open")})});
+
+function randSid(n=12){const c="abcdefghijklmnopqrstuvwxyz0123456789";let s="";for(let i=0;i<n;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+
+function getCode(){if(sC&&GEO[sC])return GEO[sC].code;const t=document.getElementById("ci").value.trim();return t?t.substring(0,2).toUpperCase():"XX"}
+
+function buildProxy(template,code,state,city,sid){
+  let p=template;
+  p=p.replace("{{SID}}",sid);
+  p=p.replace("{{REGION}}",code);
+  p=p.replace("{{STATE}}",state||"Any");
+  p=p.replace("{{CITY}}",city||"Any");
+  return p;
+}
+
+function highlight(proxy){
+  return proxy
+    .replace(/([a-z0-9.-]+\.\w+:\d+:)/i,'<span class="hl">$1</span>')
+    .replace(/([a-z0-9]{10,20})(?=[-:$])/g,(m,p,o)=>{
+      if(o>proxy.length-25)return`<span class="hl2">${m}</span>`;
+      return m;
+    });
+}
+
+function generate(){
+  if(!parsedTemplate){
+    document.getElementById("out-box").innerHTML=`<div class="empty"><i class="ti ti-alert-triangle" aria-hidden="true"></i><p>Paste a proxy and click auto-detect first!</p></div>`;
+    return;
+  }
+  const amount=Math.min(parseInt(document.getElementById("ai").value)||10,500);
+  const code=getCode();
+  const stV=(sS||document.getElementById("si").value.trim()).replace(/\s/g,"")||"";
+  const ctV=(sT||document.getElementById("ti").value.trim()).replace(/\s/g,"")||"";
+
+  const box=document.getElementById("out-box");
+  box.innerHTML="";
+  const sess=new Set();let n=0;
+  while(n<amount){
+    const sid=randSid();
+    if(!sess.has(sid)){
+      sess.add(sid);
+      const proxy=buildProxy(parsedTemplate.template,code,stV,ctV,sid);
+      const row=document.createElement("div");
+      row.className="proxy-row";
+      row.innerHTML=`<span class="proxy-num">${n+1}</span><span class="proxy-txt">${highlight(proxy)}</span>`;
+      box.appendChild(row);n++;
+    }
+  }
+  document.getElementById("sv1").textContent=n;
+  document.getElementById("sv2").textContent=code;
+  document.getElementById("sv3").textContent=[stV,ctV].filter(Boolean).join("+")||"Global";
+  document.getElementById("cpill").textContent=n+" proxies";
+  document.getElementById("live-dot").classList.add("on");
+}
+
+function doCopy(){
+  const lines=[...document.querySelectorAll(".proxy-txt")].map(d=>d.textContent).join("\n");
+  if(!lines)return;
+  navigator.clipboard.writeText(lines).catch(()=>{});
+  const btn=document.getElementById("copybtn");
+  btn.innerHTML='<i class="ti ti-check" aria-hidden="true"></i> Copied!';
+  setTimeout(()=>{btn.innerHTML='<i class="ti ti-copy" aria-hidden="true"></i> Copy all'},1500);
+}
+</script>
